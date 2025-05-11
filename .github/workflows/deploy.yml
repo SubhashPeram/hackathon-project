@@ -24,7 +24,13 @@ jobs:
             docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
             docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
           done
-      - name: Terraform Apply
+          
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init & Apply
         working-directory: terraform
         run: |
           terraform init
