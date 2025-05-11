@@ -9,3 +9,11 @@ variable "subnet_ids" {
 variable "security_group_ids" {
   type = list(string)
 }
+
+variable "bucket_name" {
+  default = "hackathon-terraform-state"
+}
+
+variable "dynamodb_table_name" {
+  default = "terraform-locks"
+}
