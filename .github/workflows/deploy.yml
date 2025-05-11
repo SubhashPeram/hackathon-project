@@ -1,39 +1,23 @@
-name: Deploy to AWS ECS Fargate
-
-on:
-  push:
-    branches: [main]
-
+name: CI/CD to AWS ECS Fargate
+on: [push]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password | docker login --username AWS --password-stdin <ECR_URI>
-
-      - name: Build, Tag and Push Docker Images
-        run: |
-          docker build -t patient-service ./patient-service
-          docker tag patient-service:latest <ECR_URI>/patient-service:latest
-          docker push <ECR_URI>/patient-service:latest
-
-          docker build -t appointment-service ./appointment-service
-          docker tag appointment-service:latest <ECR_URI>/appointment-service:latest
-          docker push <ECR_URI>/appointment-service:latest
-
-      - name: Apply Terraform Infrastructure
+      - run: |
+          ./ecr-setup.sh
+          for svc in patient-service appointment-service; do
+            docker build -t $svc ./$svc
+            docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
+            docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
+          done
+      - name: Terraform Apply
         working-directory: terraform
         run: |
           terraform init
