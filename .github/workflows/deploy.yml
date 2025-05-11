@@ -3,7 +3,7 @@ name: CI/CD to AWS ECS Fargate
 on: [push]
 
 env:
-  AWS_REGION: us-west-2
+  AWS_REGION: us-east-1
 
 jobs:
   deploy:
