@@ -21,8 +21,8 @@ jobs:
           ./ecr-setup.sh
           for svc in patient-service appointment-service; do
             docker build -t $svc ./$svc
-            docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
-            docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$svc:latest
+            docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/$svc:latest
+            docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/$svc:latest
           done
 
       - name: Set up Terraform
