@@ -12,7 +12,7 @@ jobs:
           aws-region: us-west-2
 
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+        run: aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com
 
       - name: Make ecr-setup.sh executable
         run: chmod +x ./ecr-setup.sh      
@@ -33,5 +33,6 @@ jobs:
       - name: Terraform Init & Apply
         working-directory: terraform
         run: |
+          rm -rf .terraform
           terraform init
           terraform apply -auto-approve
