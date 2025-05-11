@@ -1,28 +1,39 @@
 name: CI/CD to AWS ECS Fargate
+
 on: [push]
+
+env:
+  AWS_REGION: us-west-2
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | \
+          docker login --username AWS --password-stdin ${{ secrets.ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - name: Make ecr-setup.sh executable
-        run: chmod +x ./ecr-setup.sh      
-        
-      - run: |
+        run: chmod +x ./ecr-setup.sh
+
+      - name: Build and Push Docker Images
+        run: |
           ./ecr-setup.sh
           for svc in patient-service appointment-service; do
             docker build -t $svc ./$svc
-            docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/$svc:latest
-            docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/$svc:latest
+            docker tag $svc:latest ${{ secrets.ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$svc:latest
+            docker push ${{ secrets.ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$svc:latest
           done
 
       - name: Set up Terraform
@@ -34,5 +45,5 @@ jobs:
         working-directory: terraform
         run: |
           rm -rf .terraform
-          terraform init
+          terraform init -backend-config="region=$AWS_REGION"
           terraform apply -auto-approve
