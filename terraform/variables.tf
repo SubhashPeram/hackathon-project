@@ -11,7 +11,7 @@ variable "security_group_ids" {
 }
 
 variable "bucket_name" {
-  default = "hackathon-terraform-state"
+  default = "hackathon-tf-state"
 }
 
 variable "dynamodb_table_name" {
