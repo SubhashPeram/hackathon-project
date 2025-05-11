@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = var.bucket_name
+    bucket         = "hackathon-terraform-state"
     key            = "fargate/terraform.tfstate"
-    region         = var.region
+    region         = "us-west-2"
     dynamodb_table = "terraform-locks"
   }
 }
