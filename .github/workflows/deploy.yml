@@ -12,7 +12,9 @@ jobs:
           aws-region: us-east-1
 
       - name: Make ecr-setup.sh executable
-        run: chmod +x ./ecr-setup.sh      - run: |
+        run: chmod +x ./ecr-setup.sh      
+        
+      - run: |
           ./ecr-setup.sh
           for svc in patient-service appointment-service; do
             docker build -t $svc ./$svc
